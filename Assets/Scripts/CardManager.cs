@@ -36,21 +36,9 @@ public class CardManager : MonoBehaviour
         OnStage();
     }
 
-
-
-    public void SelectCardBtn(){
-        string numStr = EventSystem.current.currentSelectedGameObject.transform.GetChild(0).GetComponent<Text>().text;
-        myCurrentNum = int.Parse(numStr);
-        mySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = numStr;
-        Destroy(EventSystem.current.currentSelectedGameObject);
-
-        getEnemyInfo();
-    }
-    
     void OnStage(){
         if(myCurrentNum != 0 && enemyCurrentNum != 0)
         {   
-            Debug.Log(myCurrentNum + "><" + enemyCurrentNum);
             if(myCurrentNum > enemyCurrentNum)
                 myScore++;
             else if(myCurrentNum < enemyCurrentNum)
@@ -65,5 +53,14 @@ public class CardManager : MonoBehaviour
     {
         enemyCurrentNum = Random.Range(1, 10);
         enemySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = enemyCurrentNum.ToString();
+    }
+    
+    public void SelectCardBtn(){
+        string numStr = EventSystem.current.currentSelectedGameObject.transform.GetChild(0).GetComponent<Text>().text;
+        myCurrentNum = int.Parse(numStr);
+        mySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = numStr;
+        Destroy(EventSystem.current.currentSelectedGameObject);
+
+        getEnemyInfo();
     }
 }
