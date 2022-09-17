@@ -12,7 +12,7 @@ public class test : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ws = new WebSocket("ws://localhost:8000/");
+        ws = new WebSocket("ws://43.200.124.214/socket/");
         ws.Connect();
 
         ws.OnMessage += (sender, e) => {
@@ -20,7 +20,6 @@ public class test : MonoBehaviour
             var a = json.GetValue("data");
 
             Debug.Log("주소 :  "+((WebSocket)sender).Url+", 데이터 : "+a);
-
         };
     }
 
@@ -30,7 +29,6 @@ public class test : MonoBehaviour
         if (ws == null)
         {
             Debug.Log("연결 x");
-
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -39,5 +37,10 @@ public class test : MonoBehaviour
             var str = json.ToString();
             ws.Send(str);
         }
+    }
+
+    void OnDestroy(){
+        Debug.Log("Closed");
+        ws.Close();
     }
 }
