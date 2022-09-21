@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Text.RegularExpressions;
 
 public class AccountManager : MonoBehaviour
 {
@@ -23,7 +24,7 @@ public class AccountManager : MonoBehaviour
     {
         if(APIs.isLogin)
         {
-            //SceneManager.LoadScene(1);
+            SceneManager.LoadScene(1);
         }
 
         if(Input.GetKeyDown(KeyCode.Space))
@@ -57,14 +58,16 @@ public class AccountManager : MonoBehaviour
             return;
         }
 
-        WWWForm userInfo = new WWWForm();
-        userInfo.AddField("id", _id);
-        userInfo.AddField("password", _pw);
-        userInfo.AddField("email", _email);
-        userInfo.AddField("nickname", _nickname);
+        if(!ValidateRegister(_id, _pw, _pw2, _email, _nickname))
+        {
+            WWWForm userInfo = new WWWForm();
+            userInfo.AddField("id", _id);
+            userInfo.AddField("password", _pw);
+            userInfo.AddField("email", _email);
+            userInfo.AddField("nickname", _nickname);
 
-        StartCoroutine(APIs.register(userInfo));
-
+            StartCoroutine(APIs.register(userInfo));
+        }
     }
 
     public void ChangeModeBtn()
@@ -79,5 +82,51 @@ public class AccountManager : MonoBehaviour
             LoginPanel.SetActive(true);
             RegisterPanel.SetActive(false);
         }
+    }
+
+
+    bool ValidateRegister(string id, string pw, string pw2, string email, string nickname)
+    {
+        bool isRegisterable = false;
+        string errorMsg = null;
+
+        if(Regex.IsMatch(id, @"^[0-9a-z]{3,12}"))
+        {
+            errorMsg += "id OK";
+        }
+        else
+        {
+            errorMsg += "id Error";
+        }
+
+        if (pw != pw2)
+        {
+            errorMsg += "Password Check Error";
+        }
+        else
+        {
+            if (pw.Length >= 8 && pw.Length <= 20)
+            {
+                errorMsg += "Password OK";
+            }
+            else
+                errorMsg += "Password Length Error";
+        }
+
+        if (Regex.IsMatch(email, @"[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?"))
+        {
+            errorMsg += "Email OK";
+        }
+
+        if(nickname.Length > 3)
+        {
+            errorMsg += "Nickname OK";
+        }
+        else
+        {
+            errorMsg += "Nickname Error";
+        }
+        Debug.Log(errorMsg);
+        return isRegisterable;
     }
 }
