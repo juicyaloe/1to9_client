@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 public class RoomManager : MonoBehaviour
 {
     WebSocket ws;
+    public bool isUpdate = false;
 
     public static Dictionary<int, string> Rooms = new Dictionary<int, string>();
     //Panel
@@ -29,25 +30,7 @@ public class RoomManager : MonoBehaviour
         ws = new WebSocket("ws://43.200.124.214/socket/"+APIs.token);
         ws.Connect();
 
-        ws.OnMessage += (sender, e) => {
-            JObject json = JObject.Parse(e.Data);
-            PlayerInfoText.text = json.ToString();
-
-
-            if (json.GetValue("type").ToString() == "roomUpdate")
-            {
-                StartCoroutine(drawRoomList());
-            }
-
-            if (json.GetValue("type").ToString() == "test")
-            {
-                Debug.Log("HI");
-            }
-            if (json.GetValue("type").ToString() == "roomUpdate")
-            {
-                StartCoroutine(drawRoomList());
-            }
-        };
+        ws.OnMessage += messageFunc;
 
         ws.OnClose += (sender, e) => {
             Debug.Log(e.Code);
@@ -58,7 +41,23 @@ public class RoomManager : MonoBehaviour
         //e.Code : 1006번->서버 에러
     }
 
-    // Update is called once per frame
+
+
+    public void messageFunc(object sender, MessageEventArgs e)
+    {
+        JObject json = JObject.Parse(e.Data);
+
+        if (json.GetValue("type").ToString() == "roomUpdate")
+        {
+            isUpdate = true;
+        }
+
+        if (json.GetValue("type").ToString() == "test")
+        {
+            Debug.Log("HI");
+        }
+    }
+
     void Update()
     {
         if (isRoom) GoToRoom();
@@ -66,6 +65,12 @@ public class RoomManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
             roomUpdate();
+
+        if (isUpdate)
+        {
+            roomUpdate();
+            isUpdate = false;
+        }
     }
 
 
@@ -77,6 +82,7 @@ public class RoomManager : MonoBehaviour
 
     void roomUpdate()
     {
+        Debug.Log("UPDATE!");
         StartCoroutine(drawRoomList());
 
     }
@@ -113,6 +119,7 @@ public class RoomManager : MonoBehaviour
 
     IEnumerator drawRoomList()
     {
+        Debug.Log("drawstart");
         yield return StartCoroutine(APIs.getRoomList());
         Debug.Log(RoomTransform.childCount);
 

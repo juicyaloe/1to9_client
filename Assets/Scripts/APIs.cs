@@ -92,7 +92,5 @@ public static class APIs
             Debug.Log(www.downloadHandler.text);
             Debug.Log(www.responseCode);
         }
-
-        Debug.Log("aaa");
     }
 }
