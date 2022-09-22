@@ -7,9 +7,19 @@ using Newtonsoft.Json.Linq;
 
 public static class APIs
 {
+    // 회원 정보 변수
     public static string id;
+    public static string email;
+    public static string nickname;
+
+    // 로그인 여부 변수
     public static bool isLogin = false;
     public static string token;
+
+    // 방 목록 변수
+    public static Dictionary<int, string> Rooms = new Dictionary<int, string>();
+    
+    // 로그인 모듈 // 성공 실패 처리는 안함
     public static IEnumerator login(WWWForm userInfo)
     {
         UnityWebRequest www = UnityWebRequest.Post("http://43.200.124.214/api/profile/login", userInfo);
@@ -24,13 +34,14 @@ public static class APIs
         }
         else
         {
-            Debug.Log(www.downloadHandler.text);
             Debug.Log(www.responseCode);
-            //switch (www.responseCode)
-            //    case 400:
+            Debug.Log(www.downloadHandler.text);
         }
+
+        www.Dispose();
     }
 
+    // 회원가입 모듈 // 성공 실패 처리는 안함
     public static IEnumerator register(WWWForm userInfo)
     {
         UnityWebRequest www = UnityWebRequest.Post("http://43.200.124.214/api/profile/register", userInfo);
@@ -42,33 +53,45 @@ public static class APIs
         }
         else
         {
-            Debug.Log(www.downloadHandler.text);
             Debug.Log(www.responseCode);
+            Debug.Log(www.downloadHandler.text);
         }
+
+        www.Dispose();
     }
 
 
+    // token에 해당하는 회원 정보를 static id, email, nickname에 저장
     public static IEnumerator getInfo()
     {
         UnityWebRequest www = UnityWebRequest.Get("http://43.200.124.214/api/profile/token");
         www.SetRequestHeader("Authorization", token);
-
-        JObject response = JObject.Parse(www.downloadHandler.text);
-        id = response.GetValue("id").ToString();
 
         yield return www.SendWebRequest();
 
         if (www.error == null)
         {
             Debug.Log(www.downloadHandler.text);
+
+            JObject response = JObject.Parse(www.downloadHandler.text);
+            JObject info = (JObject)response.GetValue("content");
+            
+            string _id = info.GetValue("id").ToString();
+            string _email = info.GetValue("email").ToString();
+            string _nickname = info.GetValue("nickname").ToString();
+
+            id = _id; email = _email; nickname = _nickname;
         }
         else
         {
-            Debug.Log(www.downloadHandler.text);
             Debug.Log(www.responseCode);
+            Debug.Log(www.downloadHandler.text);    
         }
+
+        www.Dispose();
     }
 
+    // 방의 목록을 RoomManager.Room에 넣기
     public static IEnumerator getRoomList()
     {
         UnityWebRequest www = UnityWebRequest.Get("http://43.200.124.214/api/room/all");
@@ -85,12 +108,14 @@ public static class APIs
                 rooms[id] = roomName;
             }
 
-            RoomManager.Rooms = rooms;
+            Rooms = rooms;
         }
         else
         {
-            Debug.Log(www.downloadHandler.text);
             Debug.Log(www.responseCode);
+            Debug.Log(www.downloadHandler.text);     
         }
+
+        www.Dispose();
     }
 }
