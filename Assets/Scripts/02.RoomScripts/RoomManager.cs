@@ -122,6 +122,9 @@ public class RoomManager : MonoBehaviour
         {
             Destroy(RoomTransform.GetChild(i).gameObject);
         }
+
+        RoomTransform.DetachChildren();
+        Debug.Log(RoomTransform.childCount + "개의 방 남았음");
         
         foreach (KeyValuePair<int, string> item in APIs.Rooms)
         {
