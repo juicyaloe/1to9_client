@@ -26,11 +26,6 @@ public class AccountManager : MonoBehaviour
         {
             SceneManager.LoadScene(1);
         }
-
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            StartCoroutine(APIs.getInfo());
-        }
     }
     public void LoginBtn()
     {
