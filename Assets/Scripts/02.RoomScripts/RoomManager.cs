@@ -65,6 +65,7 @@ public class RoomManager : MonoBehaviour
 
         //e.Code : 1001번->유효기간이 지난 토큰
         //e.Code : 1002번->없는 토큰
+        //e.Code : 1005번->정상 종료
         //e.Code : 1006번->서버 에러
     }
 

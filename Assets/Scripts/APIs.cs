@@ -101,12 +101,13 @@ public static class APIs
         {
             JObject response = JObject.Parse(www.downloadHandler.text);
             Dictionary<int, string> rooms = new Dictionary<int, string>();
-            foreach (JObject item in response.GetValue("content"))
+
+            foreach (JObject item in response.GetValue("contents"))
             {
                 int id = int.Parse(item.GetValue("id").ToString());
                 string roomName = item.GetValue("name").ToString();
                 rooms[id] = roomName;
-            }
+            } 
 
             Rooms = rooms;
         }
