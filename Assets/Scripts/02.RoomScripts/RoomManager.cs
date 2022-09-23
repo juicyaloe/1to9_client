@@ -14,19 +14,15 @@ public class RoomManager : MonoBehaviour
     WebSocket ws;
     private Queue<JObject> messageQueue = new Queue<JObject>();
 
-   
     // Panel
     public GameObject RoomSelectPanel;
     public GameObject RoomPanel;
+    public GameObject RoomCreatePanel;
 
-    // 현재 방 상태인지 판단하는 변수
-    public static bool isRoom = false;
-
-    // ?? 알아서 정리하시길
+    // 방 목록 그리기
+    public InputField roomnameField;
     public Transform RoomTransform;
     public GameObject RoomObject;
-
-    public Text PlayerInfoText;
 
     void Start()
     {
@@ -90,10 +86,6 @@ public class RoomManager : MonoBehaviour
 
     void Update()
     {
-        // Room in or out
-        if (isRoom) GoToRoom();
-        else GoToRoomSelect();
-
         if (messageQueue.Count > 0)
         {
             JObject response = messageQueue.Dequeue();
@@ -146,30 +138,42 @@ public class RoomManager : MonoBehaviour
         Debug.Log(RoomTransform.childCount + "개의 방 생성");
     }
 
-    void setPlayer()
-    {
-        PlayerInfoText.text = "PLAYER";
-    }
-
-    public void GoToRoom()
-    {
-        RoomSelectPanel.SetActive(false);
-        RoomPanel.SetActive(true);
-
-    }
-
     public void CreateRoom()
     {
-        isRoom = true;
         var body = JObject.FromObject(new { id = APIs.id, roomname = APIs.id + "의 방" });
         var json = JObject.FromObject(new { type = "createRoom", body = body });
         var str = json.ToString();
         ws.Send(str);
     }
-    
+
+    public void GoToRoom()
+    {
+        if (roomnameField.text.IsNullOrEmpty()) {
+            // 방에 그냥 들어간 경우
+        }
+        else {
+            // 방을 만들고 들어간 경우
+
+            Debug.Log(roomnameField.text);
+        }
+
+
+        RoomSelectPanel.SetActive(false);
+        RoomCreatePanel.SetActive(false);
+        RoomPanel.SetActive(true);
+    }
+
     public void GoToRoomSelect()
     {
         RoomPanel.SetActive(false);
+        RoomCreatePanel.SetActive(false);
         RoomSelectPanel.SetActive(true);
+
+        roomnameField.text = "";
+    }
+
+    public void GoToRoomCreate()
+    {
+        RoomCreatePanel.SetActive(true);
     }
 }
