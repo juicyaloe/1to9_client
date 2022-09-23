@@ -47,13 +47,7 @@ public class AccountManager : MonoBehaviour
         string _email = Create_Email_InputField.text;
         string _nickname = Create_Nickname_InputField.text;
 
-        if (_pw != _pw2)
-        {
-            Debug.Log("비밀번호가 다름");
-            return;
-        }
-
-        if(!ValidateRegister(_id, _pw, _pw2, _email, _nickname))
+        if(ValidateRegister(_id, _pw, _pw2, _email, _nickname))
         {
             WWWForm userInfo = new WWWForm();
             userInfo.AddField("id", _id);
@@ -82,46 +76,37 @@ public class AccountManager : MonoBehaviour
 
     bool ValidateRegister(string id, string pw, string pw2, string email, string nickname)
     {
-        bool isRegisterable = false;
-        string errorMsg = null;
+        List<string> errorlist = new List<string>();
 
-        if(Regex.IsMatch(id, @"^[0-9a-z]{3,12}"))
+        if(!Regex.IsMatch(id, @"^[0-9a-z]{3,12}"))
         {
-            errorMsg += "id OK";
-        }
-        else
-        {
-            errorMsg += "id Error";
+            errorlist.Add("숫자, 영소문자를 이용해 3자이상 12자 이하 아이디를 만들어주세요.");
         }
 
         if (pw != pw2)
         {
-            errorMsg += "Password Check Error";
-        }
-        else
-        {
-            if (pw.Length >= 8 && pw.Length <= 20)
-            {
-                errorMsg += "Password OK";
-            }
-            else
-                errorMsg += "Password Length Error";
+            errorlist.Add("첫번째 비밀번호와 두번째 비밀번호가 일치하지 않습니다.");
         }
 
-        if (Regex.IsMatch(email, @"[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?"))
+        if (!(pw.Length >= 8 && pw.Length <= 20))
         {
-            errorMsg += "Email OK";
+            errorlist.Add("8자이상 20자 이하 비밀번호를 만들어주세요.");
         }
 
-        if(nickname.Length > 3)
+
+        if (!Regex.IsMatch(email, @"[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?"))
         {
-            errorMsg += "Nickname OK";
+            errorlist.Add("올바른 이메일 형식이 아닙니다.");
         }
-        else
+
+        if(nickname.Length < 3)
         {
-            errorMsg += "Nickname Error";
+            errorlist.Add("3자 이상의 닉네임을 만들어주세요.");
         }
-        Debug.Log(errorMsg);
-        return isRegisterable;
+
+        errorlist.ForEach((data) => Debug.Log(data));
+
+        if (errorlist.Count > 0) return false;
+        else return true;
     }
 }
