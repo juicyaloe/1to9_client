@@ -60,13 +60,24 @@ public class RoomManager : MonoBehaviour
 
     public void closeFunc(object sender, CloseEventArgs e)
     {
-        // 정상 종료
-        Debug.Log(e.Code);
-
-        //e.Code : 1001번->유효기간이 지난 토큰
-        //e.Code : 1002번->없는 토큰
-        //e.Code : 1005번->정상 종료
-        //e.Code : 1006번->서버 에러
+        switch (e.Code)
+        {
+            case 1001:
+                Debug.Log("유효기간이 지난 토큰입니다.");
+                break;
+            case 1002:
+                Debug.Log("유효하지 않은 토큰입니다.");
+                break;
+            case 1005:
+                Debug.Log("정상종료 되었습니다.");
+                break;
+            case 1006:
+                Debug.Log("서버오류로 종료되었습니다.");
+                break;
+            default:
+                Debug.Log(e.Code);
+                break;
+        }
     }
 
     // MessageControlFunc
@@ -118,14 +129,12 @@ public class RoomManager : MonoBehaviour
     {
         yield return StartCoroutine(APIs.getRoomList());
 
-        Debug.Log(RoomTransform.childCount + "개의 방 제거");
         for (int i = 0; i < RoomTransform.childCount; i++)
         {
             Destroy(RoomTransform.GetChild(i).gameObject);
         }
 
         RoomTransform.DetachChildren();
-        Debug.Log(RoomTransform.childCount + "개의 방 남았음");
         
         foreach (KeyValuePair<int, string> item in APIs.Rooms)
         {
@@ -134,8 +143,6 @@ public class RoomManager : MonoBehaviour
             Instantiate(roomObj, RoomTransform);
         }
         Debug.Log(RoomTransform.childCount + "개의 방 생성");
-
-        Debug.Log("ROOM UPDATE FINISH");
     }
 
     void setPlayer()
