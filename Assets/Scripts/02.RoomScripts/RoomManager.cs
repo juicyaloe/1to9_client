@@ -140,6 +140,7 @@ public class RoomManager : MonoBehaviour
         {
             GameObject roomObj = RoomObject;
             roomObj.transform.GetChild(0).GetComponent<Text>().text = item.Value;
+            roomObj.transform.GetChild(0).GetComponent<Text>().fontSize = 40;
             Instantiate(roomObj, RoomTransform);
         }
         Debug.Log(RoomTransform.childCount + "개의 방 생성");
