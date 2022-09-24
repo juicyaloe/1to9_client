@@ -7,19 +7,29 @@ using System.Text.RegularExpressions;
 
 public class AccountManager : MonoBehaviour
 {
+    // 알림 창 구현
+    public static NoticeUI _notice;
+
+    // 패널 구현
     public GameObject RegisterPanel;
     public GameObject LoginPanel;
 
+    // 로그인 입력 필드 구현
     public InputField ID_InputField;
     public InputField PW_InputField;
 
+    // 회원가입 입력 필드 구현
     public InputField Create_ID_InputField;
     public InputField Create_PW_InputField;
     public InputField Create_PW2_InputField;
     public InputField Create_Email_InputField;
     public InputField Create_Nickname_InputField;
 
-    public static string Response;
+    void Start()
+    {
+        _notice = FindObjectOfType<NoticeUI>();
+    }
+
     private void Update()
     {
         if(APIs.isLogin)
@@ -27,6 +37,7 @@ public class AccountManager : MonoBehaviour
             SceneManager.LoadScene(1);
         }
     }
+
     public void LoginBtn()
     {
         string _id = ID_InputField.text;
@@ -73,7 +84,6 @@ public class AccountManager : MonoBehaviour
         }
     }
 
-
     bool ValidateRegister(string id, string pw, string pw2, string email, string nickname)
     {
         List<string> errorlist = new List<string>();
@@ -104,9 +114,15 @@ public class AccountManager : MonoBehaviour
             errorlist.Add("3자 이상의 닉네임을 만들어주세요.");
         }
 
-        errorlist.ForEach((data) => Debug.Log(data));
-
-        if (errorlist.Count > 0) return false;
+        // 여기에 오류 창 띄우도록 구현
+        string data = "";
+        errorlist.ForEach((err) => data += err + '\n');
+        
+        if (errorlist.Count > 0)
+        {
+            _notice.SUB(data);
+            return false;
+        }
         else return true;
     }
 }
