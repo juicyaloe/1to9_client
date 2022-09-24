@@ -182,7 +182,7 @@ public class RoomManager : MonoBehaviour
 
     IEnumerator drawRoomMember()
     {
-        yield return StartCoroutine(APIs.getRoomList());
+        yield return StartCoroutine(APIs.getRoomInfo(currentRoomName));
         string data = "";
         foreach (var item in currentRoomMember)
         {
@@ -190,6 +190,7 @@ public class RoomManager : MonoBehaviour
             string email = item["email"];
             string nickname = item["nickname"];
             data += id + "," + email + "," + nickname + "\n";
+            Debug.Log(data);
         }
         RoomText.text = data;
     }

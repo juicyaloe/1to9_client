@@ -123,7 +123,7 @@ public static class APIs
 
     public static IEnumerator getRoomInfo(string roomName)
     {
-        UnityWebRequest www = UnityWebRequest.Get("http://43.200.124.214/api/room/all/"+ roomName);
+        UnityWebRequest www = UnityWebRequest.Get("http://43.200.124.214/api/room/name/"+ roomName);
         yield return www.SendWebRequest();
 
         if (www.error == null)
