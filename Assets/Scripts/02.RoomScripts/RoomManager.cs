@@ -24,8 +24,11 @@ public class RoomManager : MonoBehaviour
     public Transform RoomTransform;
     public GameObject RoomObject;
 
+    public Text RoomText;
+
 
     public static string currentRoomName = "";
+    public static List<Dictionary<string, string>> currentRoomMember = new List<Dictionary<string, string>>();
 
     public static bool isRoomButtonClicked = false;
     public static string roomName = "";
@@ -45,6 +48,7 @@ public class RoomManager : MonoBehaviour
         catch {
             // catch 경우 없음
         }
+        StartCoroutine(APIs.getInfo());
         StartCoroutine(roomUpdate());
     }
 
@@ -155,9 +159,10 @@ public class RoomManager : MonoBehaviour
                 }
                 Debug.Log(msg);
             }
-            else if (type == "roomMemberUpdate")
+            else if (type == "roomMemeberUpdate")
             {
-
+                StartCoroutine(drawRoomMember());
+                Debug.Log("Someone Come");
             }
             else
             {
@@ -173,6 +178,20 @@ public class RoomManager : MonoBehaviour
     void OnDestroy()
     {
         ws.Close();
+    }
+
+    IEnumerator drawRoomMember()
+    {
+        yield return StartCoroutine(APIs.getRoomList());
+        string data = "";
+        foreach (var item in currentRoomMember)
+        {
+            string id = item["id"];
+            string email = item["email"];
+            string nickname = item["nickname"];
+            data += id + "," + email + "," + nickname + "\n";
+        }
+        RoomText.text = data;
     }
 
     IEnumerator roomUpdate()
@@ -220,11 +239,11 @@ public class RoomManager : MonoBehaviour
         if (RoomCreatePanel.activeSelf == true)
         {
             RoomCreatePanel.SetActive(false);
-            roomnameField.text = "";
         }
         else
         {
             RoomCreatePanel.SetActive(true);
+            roomnameField.text = "";
         }
     }
 
@@ -243,6 +262,7 @@ public class RoomManager : MonoBehaviour
         RoomPanel.SetActive(true);
         RoomCreatePanel.SetActive(false);
         RoomSelectPanel.SetActive(false);
+        StartCoroutine(drawRoomMember());
     }
 
 
