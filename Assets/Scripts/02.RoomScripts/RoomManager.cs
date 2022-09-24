@@ -25,6 +25,8 @@ public class RoomManager : MonoBehaviour
     public GameObject RoomObject;
 
 
+    public static string currentRoomName = "";
+
     public static bool isRoomButtonClicked = false;
     public static string roomName = "";
 
@@ -43,6 +45,7 @@ public class RoomManager : MonoBehaviour
         catch {
             // catch 경우 없음
         }
+        StartCoroutine(roomUpdate());
     }
 
     // 연결 종료시 call 되는 콜백들
@@ -118,6 +121,7 @@ public class RoomManager : MonoBehaviour
                 Debug.Log(msg + code);
                 if (code == 201)
                 {
+                    currentRoomName = roomnameField.text;
                     GoRoomPanel();
                 }
             }
@@ -125,6 +129,30 @@ public class RoomManager : MonoBehaviour
             {
                 JObject body = (JObject)response.GetValue("body");
                 string msg = body.GetValue("message").ToString();
+                int code = body.GetValue("code").ToObject<int>();
+                Debug.Log(msg);
+                if (code == 200)
+                {
+                    currentRoomName = roomName;
+                    GoRoomPanel();
+                }
+            }
+            else if (type == "roomLeave")
+            {
+                JObject body = (JObject)response.GetValue("body");
+                string msg = body.GetValue("message").ToString();
+                int code = body.GetValue("code").ToObject<int>();
+                if (code == 200 || code == 202 || code == 204)
+                {
+                    Debug.Log("Exit Room");
+
+                    RoomPanel.SetActive(false);
+                    RoomCreatePanel.SetActive(false);
+                    RoomSelectPanel.SetActive(true);
+
+                    StartCoroutine(roomUpdate());
+
+                }
                 Debug.Log(msg);
             }
             else if (type == "roomMemberUpdate")
@@ -178,9 +206,12 @@ public class RoomManager : MonoBehaviour
     // 방 선택 화면으로 갈 때 부르는 함수
     public void GoToRoomSelect()
     {
-        RoomPanel.SetActive(false);
-        RoomCreatePanel.SetActive(false);
-        RoomSelectPanel.SetActive(true);
+
+        var body = JObject.FromObject(new { id = APIs.id, roomname = currentRoomName });
+        var json = JObject.FromObject(new { type = "leaveRoom", body = body });
+        var str = json.ToString();
+        ws.Send(str);
+        Debug.Log("방 나가기 버튼 눌림");
     }
 
     // 방 만들기 form을 켜고 끄는 함수
