@@ -7,7 +7,6 @@ using Newtonsoft.Json.Linq;
 
 public static class APIs
 {
-
     // 회원 정보 변수
     public static string id;
     public static string email;
@@ -20,42 +19,72 @@ public static class APIs
     // 방 목록 변수
     public static Dictionary<int, string> Rooms = new Dictionary<int, string>();
     
-    // 로그인 모듈 // 성공 실패 처리는 안함
+    // 로그인 모듈
     public static IEnumerator login(WWWForm userInfo)
     {
         UnityWebRequest www = UnityWebRequest.Post("http://43.200.124.214/api/profile/login", userInfo);
         yield return www.SendWebRequest();
 
-        if (www.error == null)
+        if (www.responseCode == 200)
         {
             JObject response = JObject.Parse(www.downloadHandler.text);
+
+            Debug.Log("로그인 성공");
             token = response.GetValue("accessToken").ToString();
             isLogin = true;
-            Debug.Log(token);
+        }
+        else if (www.responseCode == 401)
+        {
+            AccountManager._notice.SUB("틀린 비밀번호입니다.");
+        }
+        else if (www.responseCode == 404)
+        {
+            AccountManager._notice.SUB("등록되지 않은 ID입니다.");
         }
         else
         {
-            Debug.Log(www.responseCode);
-            Debug.Log(www.downloadHandler.text);
+            AccountManager._notice.SUB("서버 오류입니다.");
         }
 
         www.Dispose();
     }
 
-    // 회원가입 모듈 // 성공 실패 처리는 안함
+    // 회원가입 모듈
     public static IEnumerator register(WWWForm userInfo)
     {
         UnityWebRequest www = UnityWebRequest.Post("http://43.200.124.214/api/profile/register", userInfo);
         yield return www.SendWebRequest();
 
-        if (www.error == null)
+        if (www.responseCode == 201)
         {
-            Debug.Log(www.downloadHandler.text);
+            AccountManager._notice.SUB("회원가입이 성공했습니다! 로그인 화면으로 돌아가 로그인 해주세요.");
+        }
+        else if (www.responseCode == 400)
+        {
+            JObject response = JObject.Parse(www.downloadHandler.text);
+            string errmessage = response.GetValue("error").ToString();
+
+            switch (errmessage)
+            {
+                case "repeatedId":
+                    AccountManager._notice.SUB("중복된 아이디입니다.");
+                    break;
+                case "repeatedEmail":
+                    AccountManager._notice.SUB("중복된 이메일입니다.");
+                    break;
+                case "repeatedNickname":
+                    AccountManager._notice.SUB("중복된 닉네임입니다.");
+                    break;
+                default:
+                    AccountManager._notice.SUB("오류입니다.");
+                    break;
+
+            }
+            Debug.Log(errmessage);
         }
         else
         {
-            Debug.Log(www.responseCode);
-            Debug.Log(www.downloadHandler.text);
+            AccountManager._notice.SUB("서버 오류입니다.");
         }
 
         www.Dispose();
@@ -96,6 +125,8 @@ public static class APIs
     public static IEnumerator getRoomList()
     {
         UnityWebRequest www = UnityWebRequest.Get("http://43.200.124.214/api/room/all");
+        www.SetRequestHeader("Authorization", token);
+
         yield return www.SendWebRequest();
 
         if (www.error == null)
@@ -124,6 +155,8 @@ public static class APIs
     public static IEnumerator getRoomInfo(string roomName)
     {
         UnityWebRequest www = UnityWebRequest.Get("http://43.200.124.214/api/room/name/"+ roomName);
+        www.SetRequestHeader("Authorization", token);
+        
         yield return www.SendWebRequest();
 
         if (www.error == null)
