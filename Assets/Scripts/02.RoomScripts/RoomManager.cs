@@ -18,9 +18,9 @@ public class RoomManager : MonoBehaviour
     public GameObject RoomSelectPanel;
     public GameObject RoomPanel;
     public GameObject RoomCreatePanel;
+    public InputField roomnameField;
 
     // 방 목록 그리기
-    public InputField roomnameField;
     public Transform RoomTransform;
     public GameObject RoomObject;
 
@@ -146,34 +146,31 @@ public class RoomManager : MonoBehaviour
         ws.Send(str);
     }
 
-    public void GoToRoom()
-    {
-        if (roomnameField.text.IsNullOrEmpty()) {
-            // 방에 그냥 들어간 경우
-        }
-        else {
-            // 방을 만들고 들어간 경우
-
-            Debug.Log(roomnameField.text);
-        }
-
-
-        RoomSelectPanel.SetActive(false);
-        RoomCreatePanel.SetActive(false);
-        RoomPanel.SetActive(true);
-    }
-
+    // 방 선택 화면으로 갈 때 부르는 함수
     public void GoToRoomSelect()
     {
         RoomPanel.SetActive(false);
         RoomCreatePanel.SetActive(false);
         RoomSelectPanel.SetActive(true);
-
-        roomnameField.text = "";
     }
 
+    // 방 만들기 form을 켜고 끄는 함수
+    public void RoomCreatePanelControl()
+    {
+        if (RoomCreatePanel.activeSelf == true)
+        {
+            RoomCreatePanel.SetActive(false);
+            roomnameField.text = "";
+        }
+        else
+        {
+            RoomCreatePanel.SetActive(true);
+        }
+    }
+
+    // 방을 만들고 들어가는 함수
     public void GoToRoomCreate()
     {
-        RoomCreatePanel.SetActive(true);
+        Debug.Log("방 만들기");
     }
 }
