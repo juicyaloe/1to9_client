@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 
 public static class APIs
 {
+
     // 회원 정보 변수
     public static string id;
     public static string email;
@@ -115,6 +116,35 @@ public static class APIs
         {
             Debug.Log(www.responseCode);
             Debug.Log(www.downloadHandler.text);     
+        }
+
+        www.Dispose();
+    }
+
+    public static IEnumerator getRoomInfo(string roomName)
+    {
+        UnityWebRequest www = UnityWebRequest.Get("http://43.200.124.214/api/room/name/"+ roomName);
+        yield return www.SendWebRequest();
+
+        if (www.error == null)
+        {
+            JObject response = JObject.Parse(www.downloadHandler.text);
+            List<Dictionary<string, string>> userlist = new List<Dictionary<string, string>>();
+            foreach (JObject item in response.GetValue("contents"))
+            {
+                Dictionary<string, string> userinfo = new Dictionary<string, string>();
+
+                userinfo["id"] = item.GetValue("id").ToString();
+                userinfo["email"] = item.GetValue("email").ToString();
+                userinfo["nickname"] = item.GetValue("nickname").ToString();
+                userlist.Add(userinfo);
+            }
+            RoomManager.currentRoomMember = userlist;
+        }
+        else
+        {
+            Debug.Log(www.responseCode);
+            Debug.Log(www.downloadHandler.text);
         }
 
         www.Dispose();
