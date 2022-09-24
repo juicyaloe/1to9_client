@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 using Newtonsoft.Json.Linq;
+using UnityEngine.SceneManagement;
 
 public static class APIs
 {
@@ -18,6 +19,8 @@ public static class APIs
 
     // 방 목록 변수
     public static Dictionary<int, string> Rooms = new Dictionary<int, string>();
+    // 방 인원 변수
+    public static List<Dictionary<string, string>> currentRoomMember = new List<Dictionary<string, string>>();
     
     // 로그인 모듈
     public static IEnumerator login(WWWForm userInfo)
@@ -101,8 +104,6 @@ public static class APIs
 
         if (www.error == null)
         {
-            Debug.Log(www.downloadHandler.text);
-
             JObject response = JObject.Parse(www.downloadHandler.text);
             JObject info = (JObject)response.GetValue("content");
             
@@ -114,8 +115,15 @@ public static class APIs
         }
         else
         {
-            Debug.Log(www.responseCode);
-            Debug.Log(www.downloadHandler.text);    
+            if (www.responseCode == 419 || www.responseCode == 401)
+            {
+                Debug.Log("토큰에 문제가 있습니다. 다시 로그인해주세요.");
+                SceneManager.LoadScene(0);
+            }
+            else
+            {
+                Debug.Log("서버 오류입니다.");
+            } 
         }
 
         www.Dispose();
@@ -145,8 +153,15 @@ public static class APIs
         }
         else
         {
-            Debug.Log(www.responseCode);
-            Debug.Log(www.downloadHandler.text);     
+            if (www.responseCode == 419 || www.responseCode == 401)
+            {
+                Debug.Log("토큰에 문제가 있습니다. 다시 로그인해주세요.");
+                SceneManager.LoadScene(0);
+            }
+            else
+            {
+                Debug.Log("서버 오류입니다.");
+            }   
         }
 
         www.Dispose();
@@ -156,7 +171,7 @@ public static class APIs
     {
         UnityWebRequest www = UnityWebRequest.Get("http://43.200.124.214/api/room/name/"+ roomName);
         www.SetRequestHeader("Authorization", token);
-        
+
         yield return www.SendWebRequest();
 
         if (www.error == null)
@@ -172,12 +187,20 @@ public static class APIs
                 userinfo["nickname"] = item.GetValue("nickname").ToString();
                 userlist.Add(userinfo);
             }
-            RoomManager.currentRoomMember = userlist;
+            
+            currentRoomMember = userlist;
         }
         else
         {
-            Debug.Log(www.responseCode);
-            Debug.Log(www.downloadHandler.text);
+            if (www.responseCode == 419 || www.responseCode == 401)
+            {
+                Debug.Log("토큰에 문제가 있습니다. 다시 로그인해주세요.");
+                SceneManager.LoadScene(0);
+            }
+            else
+            {
+                Debug.Log("서버 오류입니다.");
+            }
         }
 
         www.Dispose();
