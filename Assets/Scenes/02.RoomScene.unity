@@ -369,7 +369,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 738592408}
         m_TargetAssemblyTypeName: RoomManager, Assembly-CSharp
-        m_MethodName: GoToRoom
+        m_MethodName: GoToRoomCreate
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -579,7 +579,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 738592408}
         m_TargetAssemblyTypeName: RoomManager, Assembly-CSharp
-        m_MethodName: GoToRoomSelect
+        m_MethodName: RoomCreatePanelControl
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1672,7 +1672,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 738592408}
         m_TargetAssemblyTypeName: RoomManager, Assembly-CSharp
-        m_MethodName: GoToRoomCreate
+        m_MethodName: RoomCreatePanelControl
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
