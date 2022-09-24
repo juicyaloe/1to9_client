@@ -24,6 +24,10 @@ public class RoomManager : MonoBehaviour
     public Transform RoomTransform;
     public GameObject RoomObject;
 
+
+    public static bool isRoomButtonClicked = false;
+    public static string roomName = "";
+
     void Start()
     {
         try {
@@ -86,24 +90,50 @@ public class RoomManager : MonoBehaviour
 
     void Update()
     {
+        if(isRoomButtonClicked)
+        {
+            isRoomButtonClicked = false;
+
+            var body = JObject.FromObject(new { id = APIs.id, roomname = roomName });
+            var json = JObject.FromObject(new { type = "visitRoom", body = body });
+            var str = json.ToString();
+            ws.Send(str);
+            Debug.Log("방 들어가기" + APIs.id);
+        }
         if (messageQueue.Count > 0)
         {
             JObject response = messageQueue.Dequeue();
             string type = response.GetValue("type").ToString();
-
             if (type == "roomUpdate")
             {
                 Debug.Log("룸 업데이트");
                 StartCoroutine(roomUpdate());
             }
-            else if (type == "test")
+            else if (type == "roomCreate")
             {
-                Debug.Log("테스트 메시지가 왔어요~");
-                StartCoroutine(roomUpdate());
+                JObject body = (JObject)response.GetValue("body");
+                string msg = body.GetValue("message").ToString();
+                int code = body.GetValue("code").ToObject<int>();
+
+                Debug.Log(msg + code);
+                if (code == 201)
+                {
+                    GoRoomPanel();
+                }
+            }
+            else if (type == "roomVisit")
+            {
+                JObject body = (JObject)response.GetValue("body");
+                string msg = body.GetValue("message").ToString();
+                Debug.Log(msg);
+            }
+            else if (type == "roomMemberUpdate")
+            {
+
             }
             else
             {
-                Debug.Log("알수 없는 메시지입니다.");
+                Debug.Log(type + " 알수 없는 메시지입니다.");
             }
         }
 
@@ -138,13 +168,12 @@ public class RoomManager : MonoBehaviour
         Debug.Log(RoomTransform.childCount + "개의 방 생성");
     }
 
-    public void CreateRoom()
-    {
-        var body = JObject.FromObject(new { id = APIs.id, roomname = APIs.id + "의 방" });
-        var json = JObject.FromObject(new { type = "createRoom", body = body });
-        var str = json.ToString();
-        ws.Send(str);
-    }
+
+
+
+
+
+
 
     // 방 선택 화면으로 갈 때 부르는 함수
     public void GoToRoomSelect()
@@ -171,6 +200,19 @@ public class RoomManager : MonoBehaviour
     // 방을 만들고 들어가는 함수
     public void GoToRoomCreate()
     {
+        var body = JObject.FromObject(new { id = APIs.id, roomname = roomnameField.text });
+        var json = JObject.FromObject(new { type = "createRoom", body = body });
+        var str = json.ToString();
+        ws.Send(str);
         Debug.Log("방 만들기");
     }
+
+    public void GoRoomPanel()
+    {
+        RoomPanel.SetActive(true);
+        RoomCreatePanel.SetActive(false);
+        RoomSelectPanel.SetActive(false);
+    }
+
+
 }

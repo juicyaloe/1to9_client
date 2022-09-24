@@ -36,7 +36,7 @@ public class AccountManager : MonoBehaviour
         userInfo.AddField("id", _id);
         userInfo.AddField("password", _pw);
     
-        StartCoroutine(APIs.login(userInfo));
+        StartCoroutine(APIs.login(userInfo, _id));
     }
 
     public void RegisterBtn()

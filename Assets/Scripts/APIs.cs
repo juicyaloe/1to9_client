@@ -20,7 +20,7 @@ public static class APIs
     public static Dictionary<int, string> Rooms = new Dictionary<int, string>();
     
     // 로그인 모듈 // 성공 실패 처리는 안함
-    public static IEnumerator login(WWWForm userInfo)
+    public static IEnumerator login(WWWForm userInfo, string _id)
     {
         UnityWebRequest www = UnityWebRequest.Post("http://43.200.124.214/api/profile/login", userInfo);
         yield return www.SendWebRequest();
@@ -31,6 +31,9 @@ public static class APIs
             token = response.GetValue("accessToken").ToString();
             isLogin = true;
             Debug.Log(token);
+
+            id = _id;
+            Debug.Log(id);
         }
         else
         {

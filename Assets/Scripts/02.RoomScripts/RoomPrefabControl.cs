@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RoomPrefabControl : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class RoomPrefabControl : MonoBehaviour
 
     public void GoToRoom()
     {
-        // Debug.Log(roomname);
+        RoomManager.roomName = this.transform.GetChild(0).GetComponent<Text>().text;
+        RoomManager.isRoomButtonClicked = true;
     }
 }
