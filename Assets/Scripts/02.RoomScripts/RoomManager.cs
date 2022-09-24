@@ -159,7 +159,7 @@ public class RoomManager : MonoBehaviour
                 }
                 Debug.Log(msg);
             }
-            else if (type == "roomMemeberUpdate")
+            else if (type == "roomMemberUpdate")
             {
                 StartCoroutine(drawRoomMember());
                 Debug.Log("Someone Come");
