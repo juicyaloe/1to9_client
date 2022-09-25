@@ -31,6 +31,10 @@ public class RoomManager : MonoBehaviour
     // 방에 들어갔을 때 컨트롤 변수
     public static bool isRoomSelected = false;
     public static string SelectedRoomName = "";
+    
+    // 준비 완료 버튼
+    public Text readyStateText;
+    public Button StartButton;
 
     void Start()
     {
@@ -47,6 +51,8 @@ public class RoomManager : MonoBehaviour
         catch {
             // catch 경우 없음
         }
+
+        GoRoomSelectPanel();
 
         // 초기화 세팅
         StartCoroutine(APIs.getInfo());
@@ -128,6 +134,24 @@ public class RoomManager : MonoBehaviour
         ws.Send(str);
     }
 
+    // 준비/준비 해제하는 메시지를 보내는 함수
+    public void SendChangeReadyMessage()
+    {
+        var body = JObject.FromObject(new { id = APIs.id, roomname = currentRoomName });
+        var json = JObject.FromObject(new { type = "changeReady", body = body });
+        var str = json.ToString();
+        ws.Send(str);
+    }
+
+    // 게임 시작하는 메시지를 보내는 함수
+    public void SendStartMessage()
+    {
+        var body = JObject.FromObject(new { roomname = currentRoomName });
+        var json = JObject.FromObject(new { type = "tryStartGame", body = body });
+        var str = json.ToString();
+        ws.Send(str);
+    }
+
     void Update()
     {
         // 방에 그냥 들어갔을 때 메시지를 보낸다.
@@ -153,12 +177,16 @@ public class RoomManager : MonoBehaviour
                 Debug.Log("방의 인원이 업데이트 되었습니다.");
                 StartCoroutine(RoomMemberUpdate());
             }
+            else if(type == "pleaseReady")
+            {
+                Debug.Log("준비 버튼을 눌려주세요!");
+            }
             else if (type == "roomCreate")
             {
                 JObject body = (JObject)response.GetValue("body");
                 string msg = body.GetValue("message").ToString();
                 int code = body.GetValue("code").ToObject<int>();
-;
+
                 if (code == 201)
                 {
                     currentRoomName = roomnameField.text;
@@ -222,9 +250,71 @@ public class RoomManager : MonoBehaviour
                     Debug.Log(msg);
                 }         
             }
+            else if(type == "readyChange")
+            {
+                JObject body = (JObject)response.GetValue("body");
+                string msg = body.GetValue("message").ToString();
+                int code = body.GetValue("code").ToObject<int>();
+
+                if (code == 201)
+                {
+                    Debug.Log("방의 인원이 업데이트 되었습니다.");
+                    StartCoroutine(RoomMemberUpdate());
+                }
+                else
+                {
+                    Debug.Log(msg);
+                }
+            }
+            else if(type == "gameStartTry")
+            {
+                JObject body = (JObject)response.GetValue("body");
+                string msg = body.GetValue("message").ToString();
+                int code = body.GetValue("code").ToObject<int>();
+
+                if (code == 201)
+                {
+                    int gameroomid = int.Parse(body.GetValue("gameroomid").ToString());
+                    Debug.Log("게임 시작!" + gameroomid);
+                }
+                else if(code == 400)
+                {
+                    string error = body.GetValue("error").ToString();
+                    
+                    switch (error)
+                    {
+                        case "notFoundRoom":
+                            Debug.Log("지금 방은 삭제된 방입니다.");
+                            break;
+                        case "roomNotFull":
+                            Debug.Log("2명이 있어야 게임을 시작할 수 있습니다.");
+                            break;
+                        case "gameIsStart":
+                            Debug.Log("게임이 곧 시작됩니다. 조금만 기다려 주세요.");
+                            break;
+                        case "noReady":
+                            Debug.Log("플레이어가 모두 준비완료 해야 게임을 시작할 수 있습니다.");
+                            break;
+                        default:
+                            Debug.Log(msg);
+                            break;
+                    }
+                }
+                else
+                {
+                    Debug.Log(msg);
+                }
+            }
+            else if(type == "gameStart")
+            {
+                int gameroomid = int.Parse(response.GetValue("body").ToString());
+                Debug.Log("게임 시작!" + gameroomid);
+            }
             else
             {
                 Debug.Log(type + "유형의 메세지는 알 수 없는 메시지입니다.");
+                string error = response.GetValue("error").ToString();
+                Debug.Log(error);
             }
         }
     }
@@ -255,13 +345,47 @@ public class RoomManager : MonoBehaviour
     {
         yield return StartCoroutine(APIs.getRoomInfo(currentRoomName));
 
+        bool canStart = true;
         string roomMemberInformation = "";
         foreach (var item in APIs.currentRoomMember)
         {
             string id = item["id"];
             string email = item["email"];
             string nickname = item["nickname"];
-            roomMemberInformation += nickname + "(" + id + ")" + "유저가 입장했습니다.\n";
+            roomMemberInformation += nickname + "(id: " + id + ")" + "유저가 입장했습니다.\n";
+            roomMemberInformation += nickname + "유저는 " + ((item["isready"] == "true") ? "준비완료" : "대기중") + " 상태입니다.\n\n";
+
+            // sub rendering
+            if (id == APIs.id)
+            {
+                if (item["isready"] == "true")
+                {    
+                    readyStateText.text = "현재 준비 중";
+                }
+                else
+                {
+                    readyStateText.text = "현재 대기 중";
+                }
+            }
+
+            if (item["isready"] != "true" || APIs.currentRoomMember.Count < 2)
+            {
+                canStart = false;
+            }
+        }
+
+        // sub rendering
+        ColorBlock colorBlock = StartButton.colors;
+
+        if(canStart)
+        {     
+            colorBlock.normalColor = new Color(0f, 1f, 0f, 1f);
+            StartButton.colors = colorBlock;
+        }
+        else
+        {
+            colorBlock.normalColor = new Color(1f, 1f, 1f, 1f);
+            StartButton.colors = colorBlock;
         }
 
         currentRoomText.text = roomMemberInformation;

@@ -186,6 +186,7 @@ public static class APIs
                 userinfo["id"] = item.GetValue("id").ToString();
                 userinfo["email"] = item.GetValue("email").ToString();
                 userinfo["nickname"] = item.GetValue("nickname").ToString();
+                userinfo["isready"] = (int.Parse(item.GetValue("isready").ToString()) != 0) ? "true" : "false";
                 userlist.Add(userinfo);
             }
             
