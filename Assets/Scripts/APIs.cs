@@ -8,7 +8,9 @@ using UnityEngine.SceneManagement;
 
 public static class APIs
 {
-    public static string url = "127.0.0.1:8000";
+    //public static string url = "127.0.0.1:8000";
+    public static string url = "43.200.124.214";
+
     // 회원 정보 변수
     public static string id;
     public static string email;
