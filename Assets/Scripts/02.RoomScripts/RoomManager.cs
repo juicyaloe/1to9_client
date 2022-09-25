@@ -35,7 +35,7 @@ public class RoomManager : MonoBehaviour
     void Start()
     {
         try {
-            ws = new WebSocket("ws://43.200.124.214/socket/" + APIs.token);
+            ws = new WebSocket("ws://" + APIs.url + "/socket/" + APIs.token);
         
             // 콜백 추가
             ws.OnMessage += messageFunc;
@@ -163,6 +163,7 @@ public class RoomManager : MonoBehaviour
                 {
                     currentRoomName = roomnameField.text;
                     GoRoomPanel();
+                    Debug.Log("방의 인원이 업데이트 되었습니다.");
                     StartCoroutine(RoomMemberUpdate());
                 }
                 else if (code == 400)
@@ -184,11 +185,16 @@ public class RoomManager : MonoBehaviour
                 {
                     currentRoomName = SelectedRoomName;
                     GoRoomPanel();
+                    Debug.Log("방의 인원이 업데이트 되었습니다.");
                     StartCoroutine(RoomMemberUpdate());
                 }
                 else if (code == 400)
                 {
                     Debug.Log("이미 방에 들어왔습니다.");
+                }
+                else if (code == 403)
+                {
+                    Debug.Log("방이 꽉 찼습니다.");
                 }
                 else if (code == 404)
                 {
@@ -208,6 +214,7 @@ public class RoomManager : MonoBehaviour
                 if (code == 200 || code == 202 || code == 204)
                 {
                     GoRoomSelectPanel();
+                    Debug.Log("방이 업데이트 되었습니다.");
                     StartCoroutine(roomUpdate());
                 }
                 else

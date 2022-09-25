@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 
 public static class APIs
 {
+    public static string url = "127.0.0.1:8000";
     // 회원 정보 변수
     public static string id;
     public static string email;
@@ -25,7 +26,7 @@ public static class APIs
     // 로그인 모듈
     public static IEnumerator login(WWWForm userInfo)
     {
-        UnityWebRequest www = UnityWebRequest.Post("http://43.200.124.214/api/profile/login", userInfo);
+        UnityWebRequest www = UnityWebRequest.Post("http://" + url + "/api/profile/login", userInfo);
         yield return www.SendWebRequest();
 
         if (www.responseCode == 200)
@@ -55,7 +56,7 @@ public static class APIs
     // 회원가입 모듈
     public static IEnumerator register(WWWForm userInfo)
     {
-        UnityWebRequest www = UnityWebRequest.Post("http://43.200.124.214/api/profile/register", userInfo);
+        UnityWebRequest www = UnityWebRequest.Post("http://" + url + "/api/profile/register", userInfo);
         yield return www.SendWebRequest();
 
         if (www.responseCode == 201)
@@ -97,7 +98,7 @@ public static class APIs
     // token에 해당하는 회원 정보를 static id, email, nickname에 저장
     public static IEnumerator getInfo()
     {
-        UnityWebRequest www = UnityWebRequest.Get("http://43.200.124.214/api/profile/token");
+        UnityWebRequest www = UnityWebRequest.Get("http://" + url + "/api/profile/token");
         www.SetRequestHeader("Authorization", token);
 
         yield return www.SendWebRequest();
@@ -132,7 +133,7 @@ public static class APIs
     // 방의 목록을 RoomManager.Room에 넣기
     public static IEnumerator getRoomList()
     {
-        UnityWebRequest www = UnityWebRequest.Get("http://43.200.124.214/api/room/all");
+        UnityWebRequest www = UnityWebRequest.Get("http://" + url + "/api/room/all");
         www.SetRequestHeader("Authorization", token);
 
         yield return www.SendWebRequest();
@@ -169,7 +170,7 @@ public static class APIs
 
     public static IEnumerator getRoomInfo(string roomName)
     {
-        UnityWebRequest www = UnityWebRequest.Get("http://43.200.124.214/api/room/name/"+ roomName);
+        UnityWebRequest www = UnityWebRequest.Get("http://" + url + "/api/room/name/"+ roomName);
         www.SetRequestHeader("Authorization", token);
 
         yield return www.SendWebRequest();
