@@ -276,7 +276,19 @@ public class RoomManager : MonoBehaviour
                 if (code == 201)
                 {
                     int gameroomid = int.Parse(body.GetValue("gameroomid").ToString());
+
+                    string masterid = body.GetValue("masterid").ToString();
+                    string memberid = body.GetValue("memberid").ToString();
+
                     Debug.Log("게임 시작!" + " 게임 id: " + gameroomid);
+
+                    if (masterid == APIs.id)
+                    { APIs.counterid = memberid; }
+                    else
+                    { APIs.counterid = masterid; }
+
+                    Debug.Log(APIs.counterid);
+
                     APIs.gameroomid = gameroomid;
                     SceneManager.LoadScene(2);
                 }
@@ -310,9 +322,21 @@ public class RoomManager : MonoBehaviour
             }
             else if(type == "gameStart")
             {
-                int gameroomid = int.Parse(response.GetValue("body").ToString());
+                JObject body = (JObject)response.GetValue("body");
+                int gameroomid = body.GetValue("gameroomid").ToObject<int>();
+
+                string masterid = body.GetValue("masterid").ToString();
+                string memberid = body.GetValue("memberid").ToString();
+
                 Debug.Log("게임 시작!" + " 게임 id: " + gameroomid);
+
+                if (masterid == APIs.id)
+                { APIs.counterid = memberid; }
+                else
+                { APIs.counterid = masterid; }
+
                 APIs.gameroomid = gameroomid;
+
                 SceneManager.LoadScene(2);
             }
             else

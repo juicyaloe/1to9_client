@@ -19,12 +19,12 @@ public class CardManager : MonoBehaviour
 
     public GameObject myDeckGameObject;
     public GameObject mySelectedCardGameObject;
+    public GameObject mySelectedCardGameObject_before;
     public GameObject enemySelectedCardGameObject;
+    
+    public GameObject givemecard_text;
 
     public Text scoreText;
-
-    int myScore = 0;
-    int enemyScore = 0;
 
     int myCurrentNum = 0;
     int enemyCurrentNum = 0;
@@ -50,6 +50,8 @@ public class CardManager : MonoBehaviour
 
             // 연결
             ConnectSocket();
+
+            _notice.SUB("정상적으로 접속했습니다!\n카드를 골라주세요~!");
         }
         catch {
             // catch 경우 없음
@@ -103,20 +105,131 @@ public class CardManager : MonoBehaviour
         messageQueue.Enqueue(json);
     }
 
+     // 카드를 내는 메시지를 보내는 함수
+    void SendActionMessage(int number)
+    {
+        var body = JObject.FromObject(new { userid = APIs.id, gameroomid = APIs.gameroomid, mynumber = number });
+        var json = JObject.FromObject(new { type = "doAction", body = body });
+        var str = json.ToString();
+        ws.Send(str);
+    }
+
     // Update is called once per frame
     void Update()
     {
-        OnStage();
-
         // 메세지 큐 정리
         if (messageQueue.Count > 0)
         {
             JObject response = messageQueue.Dequeue();
             string type = response.GetValue("type").ToString();
 
-            if (type == "roomUpdate")
+            if (type == "pleaseAction")
             {
-                Debug.Log("방이 업데이트 되었습니다.");
+                _notice.SUB("상대방이 숫자를 제출했습니다!");
+            }
+            else if (type == "nextRound")
+            {
+                JObject body = (JObject)response.GetValue("body");
+                string sender = body.GetValue("sender").ToString();
+
+                string winner = body.GetValue("winner").ToString();
+
+                int mynumber = body.GetValue(APIs.id).ToObject<int>();
+                int counternumber = body.GetValue(APIs.counterid).ToObject<int>();
+
+                int mywin = body.GetValue(APIs.id+"win").ToObject<int>();
+                int counterrwin = body.GetValue(APIs.counterid+"win").ToObject<int>();
+                int draw = body.GetValue("draw").ToObject<int>();
+
+                if (sender == APIs.id)
+                {
+                    givemecard_text.SetActive(true);
+
+                    Destroy(EventSystem.current.currentSelectedGameObject);
+
+                    mySelectedCardGameObject_before.transform.GetChild(0).GetComponent<Text>().text = mynumber.ToString();
+                    mySelectedCardGameObject_before.transform.GetChild(0).GetComponent<Text>().text = "?";
+                    
+                    enemySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = counternumber.ToString();   
+                }
+                else
+                {
+                    givemecard_text.SetActive(true);
+
+                    mySelectedCardGameObject_before.transform.GetChild(0).GetComponent<Text>().text = mynumber.ToString();
+                    mySelectedCardGameObject_before.transform.GetChild(0).GetComponent<Text>().text = "?";
+                    
+                    enemySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = counternumber.ToString(); 
+                }
+
+                Debug.Log(winner);
+                if (winner == APIs.id)
+                {
+                    _notice.SUB("이겼습니다! 다음 카드를 내주세요!");
+                    drawScoreText(mywin, counterrwin);
+                }
+                else if (winner == APIs.counterid)
+                {
+                    _notice.SUB("졌습니다ㅠㅠ 다음 카드를 내주세요!");
+                    drawScoreText(mywin, counterrwin);
+                }
+                else
+                {
+                    _notice.SUB("비겼습니다! 다음 카드를 내주세요!");
+                    drawScoreText(mywin, counterrwin);
+                }
+
+                // 초기화 과정
+            }
+            else if (type == "gameEnd")
+            {
+
+                // 게임 끝
+            }
+            else if (type == "actionDo")
+            {
+                JObject body = (JObject)response.GetValue("body");
+                string msg = body.GetValue("message").ToString();
+                int code = body.GetValue("code").ToObject<int>();
+
+                if (code == 200)
+                {
+                    int mynumber = body.GetValue("mynum").ToObject<int>();
+
+                    _notice.SUB("숫자를 정상적으로 제출했습니다!");
+
+                    givemecard_text.SetActive(false);
+
+                    mySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = mynumber.ToString();
+                    Destroy(EventSystem.current.currentSelectedGameObject);
+                }
+                else if (code == 404)
+                {
+                    Debug.Log("현재 게임중이 아닙니다.");
+                }
+                else if(code == 400)
+                {
+                    string error = body.GetValue("error").ToString();
+                    switch (error)
+                    {
+                        case "isDone":
+                            _notice.SUB("이미 카드를 냈습니다!");
+                            break;
+                        case "wrongNumber":
+                            Debug.Log("잘못된 숫자입니다!");
+                            break;
+                        case "notGameMember":
+                            Debug.Log("이 게임의 참여자가 아닙니다!");
+                            break;
+                        default:
+                            Debug.Log("알수없는 오류입니다!");
+                            break;
+                    }      
+                }
+                else 
+                {
+                    Debug.Log("서버 오류입니다.");
+                }
             }
             else
             {
@@ -126,33 +239,20 @@ public class CardManager : MonoBehaviour
             }
         }
     }
-
-    void OnStage(){
-        if(myCurrentNum != 0 && enemyCurrentNum != 0)
-        {   
-            if(myCurrentNum > enemyCurrentNum)
-                myScore++;
-            else if(myCurrentNum < enemyCurrentNum)
-                enemyScore++;
-            scoreText.text = myScore.ToString() + " vs " + enemyScore.ToString();
-            myCurrentNum = 0;
-            enemyCurrentNum = 0;
-        }
-    }
-
-    void getEnemyInfo()
-    {
-        enemyCurrentNum = UnityEngine.Random.Range(1, 10);
-        enemySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = enemyCurrentNum.ToString();
-    }
     
     public void SelectCardBtn(){
         string numStr = EventSystem.current.currentSelectedGameObject.transform.GetChild(0).GetComponent<Text>().text;
         myCurrentNum = int.Parse(numStr);
-        mySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = numStr;
-        Destroy(EventSystem.current.currentSelectedGameObject);
-
-        getEnemyInfo();
+        SendActionMessage(myCurrentNum);
     }
 
+    void drawScoreText(int mywin, int counterrwin)
+    {
+        scoreText.text = mywin.ToString() + " vs " + counterrwin.ToString();
+    }
+
+    public void clicked()
+    {
+
+    }
 }
