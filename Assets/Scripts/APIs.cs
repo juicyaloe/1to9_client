@@ -8,13 +8,16 @@ using UnityEngine.SceneManagement;
 
 public static class APIs
 {
-    //public static string url = "127.0.0.1:8000";
-    public static string url = "43.200.124.214";
+    public static string url = "127.0.0.1:8000";
+    //public static string url = "43.200.124.214";
 
     // 회원 정보 변수
     public static string id;
     public static string email;
     public static string nickname;
+
+    // 게임 진행상황 변수
+    public static int gameroomid;
 
     // 로그인 여부 변수
     public static bool isLogin = false;

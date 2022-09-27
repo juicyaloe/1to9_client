@@ -7,6 +7,7 @@ using WebSocketSharp;
 using Newtonsoft.Json.Linq;
 
 using System;
+using UnityEngine.SceneManagement;
 
 public class RoomManager : MonoBehaviour
 {
@@ -275,7 +276,9 @@ public class RoomManager : MonoBehaviour
                 if (code == 201)
                 {
                     int gameroomid = int.Parse(body.GetValue("gameroomid").ToString());
-                    Debug.Log("게임 시작!" + gameroomid);
+                    Debug.Log("게임 시작!" + " 게임 id: " + gameroomid);
+                    APIs.gameroomid = gameroomid;
+                    SceneManager.LoadScene(2);
                 }
                 else if(code == 400)
                 {
@@ -308,7 +311,9 @@ public class RoomManager : MonoBehaviour
             else if(type == "gameStart")
             {
                 int gameroomid = int.Parse(response.GetValue("body").ToString());
-                Debug.Log("게임 시작!" + gameroomid);
+                Debug.Log("게임 시작!" + " 게임 id: " + gameroomid);
+                APIs.gameroomid = gameroomid;
+                SceneManager.LoadScene(2);
             }
             else
             {
