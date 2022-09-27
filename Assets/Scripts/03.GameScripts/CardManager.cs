@@ -23,17 +23,17 @@ public class CardManager : MonoBehaviour
     public GameObject enemySelectedCardGameObject;
     
     public GameObject givemecard_text;
+    public GameObject backButton;
 
     public Text scoreText;
-
-    int myCurrentNum = 0;
-    int enemyCurrentNum = 0;
 
     GameObject[] myCard = new GameObject[9];
 
     void Start()
     {
         _notice = FindObjectOfType<NoticeUI>();
+
+        backButton.SetActive(false);
 
         for (int i = 0; i < 9; i++)
         {
@@ -50,6 +50,7 @@ public class CardManager : MonoBehaviour
 
             // 연결
             ConnectSocket();
+            Debug.Log("연결 완료!");
 
             _notice.SUB("정상적으로 접속했습니다!\n카드를 골라주세요~!");
         }
@@ -220,8 +221,6 @@ public class CardManager : MonoBehaviour
                 if (mywin > counterwin)
                 {
                     _notice.SUB("최종 승리했습니다!");
-
-                    
                 }
                 else if(mywin < counterwin)
                 {
@@ -231,6 +230,9 @@ public class CardManager : MonoBehaviour
                 {
                     _notice.SUB("최종 결과는 무승부입니다!");
                 }
+
+                givemecard_text.GetComponent<Text>().text = "게임이 끝났습니다. \n뒤로가기 버튼을 눌려 나가주세요.";
+                backButton.SetActive(true);
             }
             else if (type == "actionDo")
             {
@@ -286,8 +288,7 @@ public class CardManager : MonoBehaviour
     
     public void SelectCardBtn(){
         string numStr = EventSystem.current.currentSelectedGameObject.transform.GetChild(0).GetComponent<Text>().text;
-        myCurrentNum = int.Parse(numStr);
-        SendActionMessage(myCurrentNum);
+        SendActionMessage(int.Parse(numStr));
     }
 
     void drawScoreText(int mywin, int counterrwin)

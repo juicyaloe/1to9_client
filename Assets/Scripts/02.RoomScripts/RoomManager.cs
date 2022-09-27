@@ -48,6 +48,8 @@ public class RoomManager : MonoBehaviour
 
             // 연결
             ConnectSocket();
+
+            Debug.Log("연결 완료!");
         }
         catch {
             // catch 경우 없음
