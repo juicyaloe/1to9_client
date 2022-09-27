@@ -342,8 +342,6 @@ public class RoomManager : MonoBehaviour
             else
             {
                 Debug.Log(type + "유형의 메세지는 알 수 없는 메시지입니다.");
-                string error = response.GetValue("error").ToString();
-                Debug.Log(error);
             }
         }
     }

@@ -138,7 +138,7 @@ public class CardManager : MonoBehaviour
                 int counternumber = body.GetValue(APIs.counterid).ToObject<int>();
 
                 int mywin = body.GetValue(APIs.id+"win").ToObject<int>();
-                int counterrwin = body.GetValue(APIs.counterid+"win").ToObject<int>();
+                int counterwin = body.GetValue(APIs.counterid+"win").ToObject<int>();
                 int draw = body.GetValue("draw").ToObject<int>();
 
                 if (sender == APIs.id)
@@ -148,7 +148,7 @@ public class CardManager : MonoBehaviour
                     Destroy(EventSystem.current.currentSelectedGameObject);
 
                     mySelectedCardGameObject_before.transform.GetChild(0).GetComponent<Text>().text = mynumber.ToString();
-                    mySelectedCardGameObject_before.transform.GetChild(0).GetComponent<Text>().text = "?";
+                    mySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = "?";
                     
                     enemySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = counternumber.ToString();   
                 }
@@ -157,34 +157,80 @@ public class CardManager : MonoBehaviour
                     givemecard_text.SetActive(true);
 
                     mySelectedCardGameObject_before.transform.GetChild(0).GetComponent<Text>().text = mynumber.ToString();
-                    mySelectedCardGameObject_before.transform.GetChild(0).GetComponent<Text>().text = "?";
+                    mySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = "?";
                     
                     enemySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = counternumber.ToString(); 
                 }
 
-                Debug.Log(winner);
                 if (winner == APIs.id)
                 {
                     _notice.SUB("이겼습니다! 다음 카드를 내주세요!");
-                    drawScoreText(mywin, counterrwin);
+                    drawScoreText(mywin, counterwin);
                 }
                 else if (winner == APIs.counterid)
                 {
                     _notice.SUB("졌습니다ㅠㅠ 다음 카드를 내주세요!");
-                    drawScoreText(mywin, counterrwin);
+                    drawScoreText(mywin, counterwin);
                 }
                 else
                 {
                     _notice.SUB("비겼습니다! 다음 카드를 내주세요!");
-                    drawScoreText(mywin, counterrwin);
+                    drawScoreText(mywin, counterwin);
                 }
 
                 // 초기화 과정
             }
             else if (type == "gameEnd")
             {
+                JObject body = (JObject)response.GetValue("body");
+                string sender = body.GetValue("sender").ToString();
 
-                // 게임 끝
+                string winner = body.GetValue("winner").ToString();
+
+                int mynumber = body.GetValue(APIs.id).ToObject<int>();
+                int counternumber = body.GetValue(APIs.counterid).ToObject<int>();
+
+                int mywin = body.GetValue(APIs.id+"win").ToObject<int>();
+                int counterwin = body.GetValue(APIs.counterid+"win").ToObject<int>();
+                int draw = body.GetValue("draw").ToObject<int>();
+
+                if (sender == APIs.id)
+                {
+                    givemecard_text.SetActive(true);
+
+                    Destroy(EventSystem.current.currentSelectedGameObject);
+
+                    mySelectedCardGameObject_before.transform.GetChild(0).GetComponent<Text>().text = mynumber.ToString();
+                    mySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = "?";
+                    
+                    enemySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = counternumber.ToString();   
+                }
+                else
+                {
+                    givemecard_text.SetActive(true);
+
+                    mySelectedCardGameObject_before.transform.GetChild(0).GetComponent<Text>().text = mynumber.ToString();
+                    mySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = "?";
+                    
+                    enemySelectedCardGameObject.transform.GetChild(0).GetComponent<Text>().text = counternumber.ToString(); 
+                }
+
+                drawScoreText(mywin, counterwin);
+
+                if (mywin > counterwin)
+                {
+                    _notice.SUB("최종 승리했습니다!");
+
+                    
+                }
+                else if(mywin < counterwin)
+                {
+                    _notice.SUB("최종 패배했습니다ㅠㅠ");
+                }
+                else
+                {
+                    _notice.SUB("최종 결과는 무승부입니다!");
+                }
             }
             else if (type == "actionDo")
             {
@@ -234,8 +280,6 @@ public class CardManager : MonoBehaviour
             else
             {
                 Debug.Log(type + "유형의 메세지는 알 수 없는 메시지입니다.");
-                string error = response.GetValue("error").ToString();
-                Debug.Log(error);
             }
         }
     }
@@ -251,8 +295,8 @@ public class CardManager : MonoBehaviour
         scoreText.text = mywin.ToString() + " vs " + counterrwin.ToString();
     }
 
-    public void clicked()
+    public void backButtonclicked()
     {
-
+        SceneManager.LoadScene(1);
     }
 }
