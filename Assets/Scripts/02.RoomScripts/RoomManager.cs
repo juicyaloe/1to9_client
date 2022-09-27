@@ -37,8 +37,18 @@ public class RoomManager : MonoBehaviour
     public Text readyStateText;
     public Button StartButton;
 
+    public ushort exitCode = 1005;
+
+    public static NoticeUI _notice;
+
+    public Button exitButton;
+    public Text loginText;
+    public bool isDraw = false;
+
     void Start()
     {
+        _notice = FindObjectOfType<NoticeUI>();
+
         try {
             ws = new WebSocket("ws://" + APIs.url + "/socket/" + APIs.token);
         
@@ -49,7 +59,7 @@ public class RoomManager : MonoBehaviour
             // 연결
             ConnectSocket();
 
-            Debug.Log("연결 완료!");
+            _notice.SUB("정상적으로 접속 되었습니다!");
         }
         catch {
             // catch 경우 없음
@@ -77,6 +87,9 @@ public class RoomManager : MonoBehaviour
 
     public void closeFunc(object sender, CloseEventArgs e)
     {
+        JObject json = JObject.Parse("{\"type\":\"servererror\"}");
+        messageQueue.Enqueue(json);
+
         switch (e.Code)
         {
             case 1001:
@@ -99,7 +112,7 @@ public class RoomManager : MonoBehaviour
 
     void OnDestroy()
     {
-        ws.Close();
+        ws.Close(exitCode);
     }
 
     // MessageControlFunc
@@ -157,6 +170,14 @@ public class RoomManager : MonoBehaviour
 
     void Update()
     {
+        if (isDraw == false && APIs.id != null)
+        {
+            isDraw = true;
+            loginText.text = APIs.id + "회원님 환영합니다!";
+        }
+        
+
+
         // 방에 그냥 들어갔을 때 메시지를 보낸다.
         if(isRoomSelected)
         {
@@ -170,7 +191,11 @@ public class RoomManager : MonoBehaviour
             JObject response = messageQueue.Dequeue();
             string type = response.GetValue("type").ToString();
 
-            if (type == "roomUpdate")
+            if (type == "servererror")
+            {
+                _notice.SUB("서버 오류로 인해 로그인에 실패했습니다.\n다시 로그인해주세요.");
+            }
+            else if (type == "roomUpdate")
             {
                 Debug.Log("방이 업데이트 되었습니다.");
                 StartCoroutine(roomUpdate());
@@ -182,7 +207,7 @@ public class RoomManager : MonoBehaviour
             }
             else if(type == "pleaseReady")
             {
-                Debug.Log("준비 버튼을 눌려주세요!");
+                _notice.SUB("준비 버튼을 눌려주세요!");
             }
             else if (type == "roomCreate")
             {
@@ -199,7 +224,7 @@ public class RoomManager : MonoBehaviour
                 }
                 else if (code == 400)
                 {
-                    Debug.Log("이미 만들어진 방입니다.");
+                    _notice.SUB("이미 만들어진 방입니다.");
                 }
                 else
                 {
@@ -225,7 +250,7 @@ public class RoomManager : MonoBehaviour
                 }
                 else if (code == 403)
                 {
-                    Debug.Log("방이 꽉 찼습니다.");
+                    _notice.SUB("방이 꽉 찼습니다!");
                 }
                 else if (code == 404)
                 {
@@ -277,6 +302,7 @@ public class RoomManager : MonoBehaviour
 
                 if (code == 201)
                 {
+                    exitCode = 3000;
                     int gameroomid = int.Parse(body.GetValue("gameroomid").ToString());
 
                     string masterid = body.GetValue("masterid").ToString();
@@ -304,13 +330,13 @@ public class RoomManager : MonoBehaviour
                             Debug.Log("지금 방은 삭제된 방입니다.");
                             break;
                         case "roomNotFull":
-                            Debug.Log("2명이 있어야 게임을 시작할 수 있습니다.");
+                            _notice.SUB("2명이 있어야 게임을 시작할 수 있습니다.");
                             break;
                         case "gameIsStart":
                             Debug.Log("게임이 곧 시작됩니다. 조금만 기다려 주세요.");
                             break;
                         case "noReady":
-                            Debug.Log("플레이어가 모두 준비완료 해야 게임을 시작할 수 있습니다.");
+                            _notice.SUB("플레이어가 모두 준비완료해야 게임을 시작할 수 있습니다.");
                             break;
                         default:
                             Debug.Log(msg);
@@ -324,6 +350,8 @@ public class RoomManager : MonoBehaviour
             }
             else if(type == "gameStart")
             {
+                exitCode = 3000;
+
                 JObject body = (JObject)response.GetValue("body");
                 int gameroomid = body.GetValue("gameroomid").ToObject<int>();
 
@@ -450,4 +478,12 @@ public class RoomManager : MonoBehaviour
         RoomPanel.SetActive(true);
     }
 
+    public void GoToLogin()
+    {
+        APIs.token = "";
+        APIs.isLogin = false;
+        APIs.id = null;
+
+        SceneManager.LoadScene(0);
+    }
 }

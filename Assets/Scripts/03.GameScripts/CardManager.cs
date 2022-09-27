@@ -124,7 +124,14 @@ public class CardManager : MonoBehaviour
             JObject response = messageQueue.Dequeue();
             string type = response.GetValue("type").ToString();
 
-            if (type == "pleaseAction")
+            if (type == "gameRoomDestroyed")
+            {
+                _notice.SUB("상대방이 게임 도중에 나갔습니다.");
+                givemecard_text.SetActive(true);
+                givemecard_text.GetComponent<Text>().text = "게임이 끝났습니다. \n뒤로가기 버튼을 눌러 나가주세요.";
+                backButton.SetActive(true);
+            }
+            else if (type == "pleaseAction")
             {
                 _notice.SUB("상대방이 숫자를 제출했습니다!");
             }
