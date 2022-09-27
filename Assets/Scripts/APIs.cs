@@ -16,6 +16,10 @@ public static class APIs
     public static string email;
     public static string nickname;
 
+    // 게임 진행상황 변수
+    public static int gameroomid;
+    public static string counterid;
+
     // 로그인 여부 변수
     public static bool isLogin = false;
     public static string token;

@@ -10,7 +10,7 @@ public class NoticeUI : MonoBehaviour
     public Text subintext;
     public Animator subani;
 
-    private WaitForSeconds _UIDelay1 = new WaitForSeconds(2.0f);
+    private WaitForSeconds _UIDelay1 = new WaitForSeconds(0.7f);
     private WaitForSeconds _UIDelay2 = new WaitForSeconds(0.3f);
 
     // Start is called before the first frame update

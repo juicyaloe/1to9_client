@@ -7,6 +7,7 @@ using WebSocketSharp;
 using Newtonsoft.Json.Linq;
 
 using System;
+using UnityEngine.SceneManagement;
 
 public class RoomManager : MonoBehaviour
 {
@@ -47,6 +48,8 @@ public class RoomManager : MonoBehaviour
 
             // 연결
             ConnectSocket();
+
+            Debug.Log("연결 완료!");
         }
         catch {
             // catch 경우 없음
@@ -275,7 +278,21 @@ public class RoomManager : MonoBehaviour
                 if (code == 201)
                 {
                     int gameroomid = int.Parse(body.GetValue("gameroomid").ToString());
-                    Debug.Log("게임 시작!" + gameroomid);
+
+                    string masterid = body.GetValue("masterid").ToString();
+                    string memberid = body.GetValue("memberid").ToString();
+
+                    Debug.Log("게임 시작!" + " 게임 id: " + gameroomid);
+
+                    if (masterid == APIs.id)
+                    { APIs.counterid = memberid; }
+                    else
+                    { APIs.counterid = masterid; }
+
+                    Debug.Log(APIs.counterid);
+
+                    APIs.gameroomid = gameroomid;
+                    SceneManager.LoadScene(2);
                 }
                 else if(code == 400)
                 {
@@ -307,14 +324,26 @@ public class RoomManager : MonoBehaviour
             }
             else if(type == "gameStart")
             {
-                int gameroomid = int.Parse(response.GetValue("body").ToString());
-                Debug.Log("게임 시작!" + gameroomid);
+                JObject body = (JObject)response.GetValue("body");
+                int gameroomid = body.GetValue("gameroomid").ToObject<int>();
+
+                string masterid = body.GetValue("masterid").ToString();
+                string memberid = body.GetValue("memberid").ToString();
+
+                Debug.Log("게임 시작!" + " 게임 id: " + gameroomid);
+
+                if (masterid == APIs.id)
+                { APIs.counterid = memberid; }
+                else
+                { APIs.counterid = masterid; }
+
+                APIs.gameroomid = gameroomid;
+
+                SceneManager.LoadScene(2);
             }
             else
             {
                 Debug.Log(type + "유형의 메세지는 알 수 없는 메시지입니다.");
-                string error = response.GetValue("error").ToString();
-                Debug.Log(error);
             }
         }
     }
