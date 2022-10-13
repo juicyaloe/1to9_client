@@ -1,3 +1,4 @@
-# 1-9 게임 클라이언트입니다.
+# 1to9 client
 
-유니티 + C#을 통해서 구현했습니다.
+### using stack:
+- unity, websocketsharp
